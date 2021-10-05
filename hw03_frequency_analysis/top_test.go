@@ -79,4 +79,27 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+
+	t.Run("less then 10 words test", func(t *testing.T) {
+		expected := []string{
+			"Как", // 3
+			"как", // 2
+		}
+		require.Equal(t, expected, Top10(`Как как Как как Как`))
+	})
+
+	t.Run("the same last words", func(t *testing.T) {
+		expected := []string{
+			"как", // 3
+			"Как", // 2
+		}
+		require.Equal(t, expected, Top10(`Как как Как как как`))
+	})
+
+	t.Run("One word", func(t *testing.T) {
+		expected := []string{
+			"Как", // 1
+		}
+		require.Equal(t, expected, Top10(`Как`))
+	})
 }
