@@ -24,7 +24,7 @@ func Run(tasks []Task, n, m int) error {
 	// consumers
 	for i := 0; i < n && i < tasksLen; i++ {
 		wg.Add(1)
-		go func(ch chan Task, quitCh chan bool, i int) {
+		go func(ch chan Task, quitCh chan bool) {
 			for {
 				select {
 				case task := <-ch:
@@ -38,7 +38,7 @@ func Run(tasks []Task, n, m int) error {
 					return
 				}
 			}
-		}(ch, quitCh, i)
+		}(ch, quitCh)
 	}
 
 	// producer
