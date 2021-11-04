@@ -43,7 +43,7 @@ func Run(tasks []Task, n, m int) error {
 
 	// producer
 	for _, task := range tasks {
-		if errCount < uint64(m) {
+		if atomic.LoadUint64(&errCount) < uint64(m) {
 			ch <- task
 		} else {
 			break
@@ -56,7 +56,7 @@ func Run(tasks []Task, n, m int) error {
 
 	wg.Wait()
 
-	if m > 0 && errCount >= uint64(m) {
+	if m > 0 && atomic.LoadUint64(&errCount) >= uint64(m) {
 		return ErrErrorsLimitExceeded
 	}
 	return nil
