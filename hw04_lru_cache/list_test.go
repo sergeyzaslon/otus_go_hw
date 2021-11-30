@@ -48,4 +48,14 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("correct links", func(t *testing.T) {
+		l := NewList()
+
+		li := l.PushBack(1)
+
+		require.Equal(t, 1, l.Len())
+		require.Nil(t, l.Front())
+		require.Equal(t, li, l.Back())
+	})
 }
