@@ -91,7 +91,7 @@ func TestPipeline(t *testing.T) {
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
 
-	t.Run("without stages case", func(t *testing.T) {
+	t.Run("Without stages case", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
 
@@ -110,7 +110,7 @@ func TestPipeline(t *testing.T) {
 		require.Equal(t, data, result)
 	})
 
-	t.Run("without stages with done", func(t *testing.T) {
+	t.Run("Without stages with done", func(t *testing.T) {
 		in := make(Bi)
 		done := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
@@ -130,7 +130,7 @@ func TestPipeline(t *testing.T) {
 		require.Equal(t, data, result)
 	})
 
-	t.Run("empty stages", func(t *testing.T) {
+	t.Run("Empty stages", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
 
