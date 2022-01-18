@@ -1,18 +1,30 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 )
 
+const exitError = 1
+
 func main() {
-	args := os.Args[1:]
-	if len(args) < 2 {
-		log.Fatal("not enough args")
+	args := os.Args
+	if len(args) < 3 {
+		usage()
 	}
-	env, err := ReadDir(args[0])
+
+	env, err := ReadDir(args[1])
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("ERR: failed to read %s: %s", args[1], err.Error())
+		os.Exit(exitError)
 	}
-	os.Exit(RunCmd(args[1:], env))
+
+	code := RunCmd(args[2:], env)
+
+	os.Exit(code)
+}
+
+func usage() {
+	fmt.Println("Usage: go-envdir /path/to/env/dir /path/to/command command arguments")
+	os.Exit(0)
 }
