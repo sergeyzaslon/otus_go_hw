@@ -2,30 +2,64 @@ package internalhttp
 
 import (
 	"context"
+	"net"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 )
 
-type Server struct { // TODO
+type Server struct {
+	host   string
+	port   int
+	logger Logger
+	server *http.Server
 }
 
-type Logger interface { // TODO
+type Logger interface {
+	Info(msg string, params ...interface{})
+	LogHTTPRequest(r *http.Request, code, length int)
 }
 
-type Application interface { // TODO
+func NewServer(logger Logger, app *app.App, host string, port int) *Server {
+	myServer := &Server{
+		host:   host,
+		port:   port,
+		logger: logger,
+		server: nil,
+	}
+
+	httpServer := &http.Server{
+		Addr:    net.JoinHostPort(host, strconv.Itoa(port)),
+		Handler: loggingMiddleware(NewRouter(app), logger),
+	}
+
+	myServer.server = httpServer
+
+	return myServer
 }
 
-func NewServer(logger Logger, app Application) *Server {
-	return &Server{}
+func NewRouter(app *app.App) http.Handler {
+	handlers := NewServerHandlers(app)
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", handlers.HelloWorld).Methods("GET")
+
+	return r
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	// TODO
-	<-ctx.Done()
+	s.logger.Info("Start HTTP Server on %s:%d", s.host, s.port)
+	err := s.server.ListenAndServe()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	// TODO
+	s.server.Shutdown(ctx)
 	return nil
 }
-
-// TODO
