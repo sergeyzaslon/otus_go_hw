@@ -45,7 +45,7 @@ func (s *Storage) Close(ctx context.Context) error {
 
 func (s *Storage) Create(e app.Event) error {
 	sql := `INSERT INTO 
-				events(id, title, date, duration, description, user_id, notify_before, notify_at) 
+				events(id, title, date, duration, description, userId, notify_before, notify_at) 
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
 	s.logg.Debug("SQL.Create: %s", sql)
@@ -68,7 +68,7 @@ func (s *Storage) Create(e app.Event) error {
 
 func (s *Storage) Update(e app.Event) error {
 	sql := `UPDATE events 
-				SET title=$1, date = $2, duration=$3, description=$4, user_id=$5, notify_before=$6, notify_at=$7 
+				SET title=$1, date = $2, duration=$3, description=$4, userId=$5, notify_before=$6, notify_at=$7 
 				WHERE id = $8`
 	_, err := s.conn.Exec(
 		s.ctx,
@@ -97,7 +97,7 @@ func (s *Storage) FindOne(id uuid.UUID) (*app.Event, error) {
 	var e app.Event
 	var durationSeconds, notifyBeforeSeconds int
 
-	query := "SELECT id, title, date, duration, description, user_id, notify_before FROM events WHERE id = $1"
+	query := "SELECT id, title, date, duration, description, userId, notify_before FROM events WHERE id = $1"
 	err := s.conn.QueryRow(s.ctx, query, id).Scan(
 		&e.ID,
 		&e.Title,
@@ -122,7 +122,7 @@ func (s *Storage) FindOne(id uuid.UUID) (*app.Event, error) {
 }
 
 func (s *Storage) FindAll() ([]app.Event, error) {
-	sql := "SELECT id, title, date, duration, description, user_id, notify_before FROM events ORDER BY date"
+	sql := "SELECT id, title, date, duration, description, userId, notify_before FROM events ORDER BY date"
 	rows, err := s.conn.Query(s.ctx, sql)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s *Storage) FindAll() ([]app.Event, error) {
 }
 
 func (s *Storage) GetEventsReadyToNotify(dt time.Time) ([]app.Event, error) {
-	sql := `SELECT id, title, date, duration, description, user_id, notify_before 
+	sql := `SELECT id, title, date, duration, description, userId, notify_before 
 			FROM events 
 			WHERE notified = false AND notify_at <= $1`
 	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
@@ -146,7 +146,7 @@ func (s *Storage) GetEventsReadyToNotify(dt time.Time) ([]app.Event, error) {
 }
 
 func (s *Storage) GetEventsOlderThan(dt time.Time) ([]app.Event, error) {
-	sql := `SELECT id, title, date, duration, description, user_id, notify_before 
+	sql := `SELECT id, title, date, duration, description, userId, notify_before 
 			FROM events 
 			WHERE date <= $1`
 	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
