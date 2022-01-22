@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package event;
 
-// option go_package = "github.com/katin.dev/otus-go-hw/hw12_13_14_15_calendar/internalgrpc";
+// option go_package = "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internalgrpc";
 option go_package = "./;internalgrpc";
 
 service EventService {
