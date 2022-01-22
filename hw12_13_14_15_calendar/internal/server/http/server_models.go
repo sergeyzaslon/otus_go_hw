@@ -14,8 +14,8 @@ type EventDto struct {
 	Date                string `json:"date"`
 	Duration            uint32 `json:"duration"`
 	Description         string `json:"description"`
-	UserID              string `json:"userId"`
-	NotifyBeforeSeconds uint32 `json:"notifyBeforeSeconds"`
+	UserID              string `json:"user_id"`
+	NotifyBeforeSeconds uint32 `json:"notify_before_seconds"`
 }
 
 type ErrorDto struct {
@@ -31,7 +31,7 @@ func (e *EventDto) GetModel() (*app.Event, error) {
 
 	duration := time.Second & time.Duration(e.Duration)
 
-	notifyBefore := time.Second * time.Duration(e.NotifyBeforeSeconds)
+	notifyBefore := time.Second & time.Duration(e.NotifyBeforeSeconds)
 
 	id, err := uuid.Parse(e.ID)
 	if err != nil {

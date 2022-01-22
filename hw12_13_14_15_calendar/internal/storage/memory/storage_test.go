@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/app"
-	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/tools"
 	"github.com/stretchr/testify/require"
 )
 
@@ -48,45 +47,5 @@ func TestStorage(t *testing.T) {
 
 		saved, _ = s.FindAll()
 		require.Len(t, saved, 0)
-	})
-
-	t.Run("Test Storage::GetEventsReadyToNotify()", func(t *testing.T) {
-		events := []app.Event{
-			{
-				ID:           tools.CreateUUID("4927aa58-a175-429a-a125-c04765597150"),
-				Dt:           tools.CreateDate("2022-01-06T11:59:59Z"),
-				NotifyBefore: 0,
-			},
-			{
-				ID:           tools.CreateUUID("4927aa58-a175-429a-a125-c04765597151"),
-				Dt:           tools.CreateDate("2022-01-06T12:00:00Z"),
-				NotifyBefore: 0,
-			},
-			{
-				ID:           tools.CreateUUID("4927aa58-a175-429a-a125-c04765597152"),
-				Dt:           tools.CreateDate("2022-01-06T12:15:00Z"),
-				NotifyBefore: time.Minute * 15,
-			},
-			{
-				ID:           tools.CreateUUID("4927aa58-a175-429a-a125-c04765597153"),
-				Dt:           tools.CreateDate("2022-01-06T12:00:01Z"),
-				NotifyBefore: 0,
-			},
-		}
-
-		for _, e := range events {
-			s.Create(e)
-		}
-
-		readyEvents, err := s.GetEventsReadyToNotify(tools.CreateDate("2022-01-06T12:00:00Z"))
-		require.Nil(t, err)
-
-		ids := tools.ExtractEventID(readyEvents)
-		idsExpected := []string{
-			"4927aa58-a175-429a-a125-c04765597150",
-			"4927aa58-a175-429a-a125-c04765597151",
-			"4927aa58-a175-429a-a125-c04765597152",
-		}
-		require.Equal(t, idsExpected, ids)
 	})
 }

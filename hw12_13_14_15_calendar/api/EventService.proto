@@ -2,6 +2,41 @@ syntax = "proto3";
 
 package event;
 
+// option go_package = "github.com/katin.dev/otus-go-hw/hw12_13_14_15_calendar/internalgrpc";
+option go_package = "./;internalgrpc";
+
+service EventService {
+    rpc Create(Event) returns (EventResponse);
+    rpc Update(Event) returns (EventResponse);
+    rpc Delete(DeleteEventRequest) returns (EventResponse);
+    rpc EventListDay(EventListRequest) returns (EventListResponse);
+    rpc EventListWeek(EventListRequest) returns (EventListResponse);
+    rpc EventListMonth(EventListRequest) returns (EventListResponse);
+}
+
 message Event {
-    // TODO
+    string id = 1;
+	string title = 2;
+	string date = 3;
+	uint32 duration = 4;
+	string description = 5;
+	string user_id = 6;
+	uint32 notify_before_seconds = 7;
+}
+
+message DeleteEventRequest {
+    string id = 1;
+}
+
+message EventResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+message EventListRequest {
+    string date = 1;
+}
+
+message EventListResponse {
+    repeated Event events = 1;
 }

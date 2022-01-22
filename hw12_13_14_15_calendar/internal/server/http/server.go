@@ -45,6 +45,10 @@ func NewRouter(app *app.App) http.Handler {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handlers.HelloWorld).Methods("GET")
+	r.HandleFunc("/events", handlers.CreateEvent).Methods("POST")
+	r.HandleFunc("/events/{id}", handlers.UpdateEvent).Methods("PUT")
+	r.HandleFunc("/events/{id}", handlers.DeleteEvent).Methods("DELETE")
+	r.HandleFunc("/events", handlers.ListEvents).Methods("GET")
 
 	return r
 }
