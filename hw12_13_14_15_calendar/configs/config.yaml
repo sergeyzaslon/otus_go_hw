@@ -1,0 +1,13 @@
+logger:
+  level: debug
+  file: stderr
+  formatter: text
+storage:
+  type: sql
+  dsn: postgres://calendar:calendar@localhost:5434/calendar
+http:
+  host: 127.0.0.1
+  port: 8012
+grpc:
+  host: 127.0.0.1
+  port: 8013
