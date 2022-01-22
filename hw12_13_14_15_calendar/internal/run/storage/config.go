@@ -1,6 +1,5 @@
 package storage
 
 type Conf struct {
-	Type string
-	Dsn  string
+	Dsn string `env:"STORAGE_DSN,required"`
 }

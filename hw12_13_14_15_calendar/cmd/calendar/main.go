@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -19,7 +21,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", os.Getenv("CONFIG_FILE"), "Path to configuration file")
 }
 
 func main() {
@@ -32,10 +34,19 @@ func main() {
 
 	// Init: App Config
 	cfg := &Config{}
-	err := configutil.LoadConfig(configFile, cfg)
-	if err != nil {
-		log.Fatalf("Failed to read config: %s", err)
+	if configFile != "" {
+		err := configutil.LoadConfigFromFile(configFile, cfg)
+		if err != nil {
+			log.Fatalf("Failed to load config: %s", err)
+		}
+	} else {
+		err := configutil.LoadConfigFromEnv(cfg)
+		if err != nil {
+			log.Fatalf("Failed to load config: %s", err)
+		}
 	}
+
+	fmt.Println(cfg)
 
 	logg, err := logger.New(cfg.Logger.File, cfg.Logger.Level, cfg.Logger.Formatter)
 	if err != nil {

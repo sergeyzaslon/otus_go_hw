@@ -14,15 +14,6 @@ build:
 run: build
 	$(BIN) -config ./configs/config.yaml
 
-build-img:
-	docker build \
-		--build-arg=LDFLAGS="$(LDFLAGS)" \
-		-t $(DOCKER_IMG) \
-		-f build/Dockerfile .
-
-run-img: build-img
-	docker run $(DOCKER_IMG)
-
 version: build
 	$(BIN) version
 
@@ -40,5 +31,8 @@ migrate:
 
 generate: 
 	go generate ./...
+
+up:
+	docker-compose up -d 
 
 .PHONY: build run build-img run-img version test lint

@@ -12,6 +12,6 @@ grpc:
   host: 127.0.0.1
   port: 8013
 rabbit: 
-  dsn: amqp://guest:guest@localhost:5672/
+  dsn: amqp://guest:guest@localhost:5673/
   queue: event_notifications
   exchange: calendar

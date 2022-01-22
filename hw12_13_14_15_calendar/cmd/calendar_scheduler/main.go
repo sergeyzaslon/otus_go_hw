@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -19,27 +20,33 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", os.Getenv("CONFIG_FILE"), "Path to configuration file")
 }
 
 func main() {
 	flag.Parse()
 
-	// Init: App Config
-	config := &Config{}
-	err := configutil.LoadConfig(configFile, config)
-	if err != nil {
-		log.Fatalf("Failed to read config: %s", err)
+	cfg := &Config{}
+	if configFile != "" {
+		err := configutil.LoadConfigFromFile(configFile, cfg)
+		if err != nil {
+			log.Fatalf("Failed to load config: %s", err)
+		}
+	} else {
+		err := configutil.LoadConfigFromEnv(cfg)
+		if err != nil {
+			log.Fatalf("Failed to load config: %s", err)
+		}
 	}
 
-	logg, err := logger.New(config.Logger.File, config.Logger.Level, config.Logger.Formatter)
+	logg, err := logger.New(cfg.Logger.File, cfg.Logger.Level, cfg.Logger.Formatter)
 	if err != nil {
 		log.Fatalf("Failed to create logger: %s", err)
 	}
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	storage, err := storagefactory.Create(ctx, config.Storage, logg)
+	storage, err := storagefactory.Create(ctx, cfg.Storage, logg)
 	if err != nil {
 		log.Fatalf("Failed to create storage: %s", err)
 	}
@@ -52,7 +59,7 @@ func main() {
 		log.Fatalf("Storage does not implement app.EventSource interface")
 	}
 
-	rcv, err := queue.NewRabbitQueue(ctx, config.Rabbit.Dsn, config.Rabbit.Exchange, config.Rabbit.Queue, logg)
+	rcv, err := queue.NewRabbitQueue(ctx, cfg.Rabbit.Dsn, cfg.Rabbit.Exchange, cfg.Rabbit.Queue, logg)
 	if err != nil {
 		log.Fatalf("Failed to create NotificationSender (rabbit): %s", err)
 	}

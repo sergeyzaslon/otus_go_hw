@@ -1,6 +1,9 @@
 # Собираем в гошке
 FROM golang:1.16.2 as build
 
+ENV CGO_ENABLED=0
+RUN go install github.com/antelman107/net-wait-go@latest
+
 ENV BIN_FILE /opt/calendar/calendar-app
 ENV CODE_DIR /go/src/
 
@@ -25,12 +28,10 @@ FROM alpine:3.9
 
 LABEL ORGANIZATION="OTUS Online Education"
 LABEL SERVICE="calendar"
-LABEL MAINTAINERS="student@otus.ru"
+LABEL MAINTAINERS="sergeyzaslon@gmail.com"
 
 ENV BIN_FILE "/opt/calendar/calendar-app"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
+COPY --from=build /go/bin/net-wait-go /bin/net-wait-go
 
-ENV CONFIG_FILE /etc/calendar/config.toml
-COPY ./configs/config.toml ${CONFIG_FILE}
-
-CMD ${BIN_FILE} -config ${CONFIG_FILE}
+CMD ${BIN_FILE}
