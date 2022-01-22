@@ -8,3 +8,9 @@ services:
       - POSTGRES_USER=calendar
       - POSTGRES_PASSWORD=calendar
       - POSTGRES_DB=calendar
+
+  rabbit: 
+    image: rabbitmq:3.9.11-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"

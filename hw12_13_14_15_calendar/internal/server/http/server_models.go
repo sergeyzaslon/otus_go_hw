@@ -31,7 +31,7 @@ func (e *EventDto) GetModel() (*app.Event, error) {
 
 	duration := time.Second & time.Duration(e.Duration)
 
-	notifyBefore := time.Second & time.Duration(e.NotifyBeforeSeconds)
+	notifyBefore := time.Second * time.Duration(e.NotifyBeforeSeconds)
 
 	id, err := uuid.Parse(e.ID)
 	if err != nil {

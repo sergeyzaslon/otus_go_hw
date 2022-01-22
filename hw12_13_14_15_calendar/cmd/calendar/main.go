@@ -3,20 +3,17 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/logger"
+	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/run/configutil"
+	storagefactory "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/run/storage"
 	internalgrpc "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/storage/sql"
-	"gopkg.in/yaml.v2"
 )
 
 var configFile string
@@ -34,35 +31,27 @@ func main() {
 	}
 
 	// Init: App Config
-	config, err := loadConfig(configFile)
+	cfg := &Config{}
+	err := configutil.LoadConfig(configFile, cfg)
 	if err != nil {
 		log.Fatalf("Failed to read config: %s", err)
 	}
 
-	logg, err := logger.New(config.Logger.File, config.Logger.Level, config.Logger.Formatter)
+	logg, err := logger.New(cfg.Logger.File, cfg.Logger.Level, cfg.Logger.Formatter)
 	if err != nil {
 		log.Fatalf("Failed to create logger: %s", err)
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	// Init: Storage
-	var storage app.Storage
-	switch config.Storage.Type {
-	case StorageMem:
-		storage = memorystorage.New()
-	case StorageSQL:
-		sqlStorage := sqlstorage.New(ctx, config.Storage.Dsn, logg)
-		sqlStorage.Connect(ctx)
-		storage = sqlStorage
-	default:
-		log.Fatalf("Unknown storage type: %s\n", config.Storage.Type)
+	storage, err := storagefactory.Create(ctx, cfg.Storage, logg)
+	if err != nil {
+		log.Fatalf("Failed to create storage: %s", err)
 	}
-	defer cancel()
 
 	calendar := app.New(logg, storage)
 
-	serverGrpc := internalgrpc.NewServer(config.GRPC.Port, calendar, logg)
+	serverGrpc := internalgrpc.NewServer(cfg.GRPC.Port, calendar, logg)
 
 	// Осторожно завершаем работу HTTP сервера
 	go func() {
@@ -72,7 +61,7 @@ func main() {
 
 	go serverGrpc.Start()
 
-	server := internalhttp.NewServer(logg, calendar, config.HTTP.Host, config.HTTP.Port)
+	server := internalhttp.NewServer(logg, calendar, cfg.HTTP.Host, cfg.HTTP.Port)
 
 	// Осторожно завершаем работу HTTP сервера
 	go func() {
@@ -93,19 +82,4 @@ func main() {
 	}()
 
 	<-ctx.Done()
-}
-
-func loadConfig(configPath string) (*Config, error) {
-	content, err := os.ReadFile(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config %s: %w", configPath, err)
-	}
-
-	cfg := NewConfig()
-	err = yaml.Unmarshal(content, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read yaml: %w", err)
-	}
-
-	return &cfg, nil
 }

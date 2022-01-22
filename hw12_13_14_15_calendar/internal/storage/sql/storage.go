@@ -2,6 +2,7 @@ package sql
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -43,18 +44,9 @@ func (s *Storage) Close(ctx context.Context) error {
 }
 
 func (s *Storage) Create(e app.Event) error {
-	/* sql := "SELECT * FROM events WHERE date = $1 AND userId = $1"
-	row := s.conn.QueryRow(s.ctx, sql, e.Dt.Unix(), e.UserId)
-	if err := row.Scan(); err != nil {
-		if err != pgx.ErrNoRows {
-			// return fmt.Errorf("event with such date and user already exists")
-			return fmt.Errorf("Failed to SELECT: %w", err)
-		}
-	} */
-
 	sql := `INSERT INTO 
-				events(id, title, date, duration, description, userId, notify_before) 
-				VALUES ($1, $2, $3, $4, $5, $6, $7)`
+				events(id, title, date, duration, description, userId, notify_before, notify_at) 
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
 	s.logg.Debug("SQL.Create: %s", sql)
 
@@ -68,13 +60,16 @@ func (s *Storage) Create(e app.Event) error {
 		e.Description,
 		e.UserID,
 		e.NotifyBefore.Seconds(),
+		e.Dt.Add(-1*e.NotifyBefore).Format(time.RFC3339),
 	)
 
 	return err
 }
 
 func (s *Storage) Update(e app.Event) error {
-	sql := "UPDATE events SET title=$1, date = $2, duration=$3, description=$4, userId=$5, notify_before=$6 WHERE id = $7"
+	sql := `UPDATE events 
+				SET title=$1, date = $2, duration=$3, description=$4, userId=$5, notify_before=$6, notify_at=$7 
+				WHERE id = $8`
 	_, err := s.conn.Exec(
 		s.ctx,
 		sql,
@@ -84,6 +79,7 @@ func (s *Storage) Update(e app.Event) error {
 		e.Description,
 		e.UserID,
 		e.NotifyBefore.Seconds(),
+		e.Dt.Add(-1*e.NotifyBefore).Format(time.RFC3339),
 		e.ID.String(),
 	)
 
@@ -126,8 +122,6 @@ func (s *Storage) FindOne(id uuid.UUID) (*app.Event, error) {
 }
 
 func (s *Storage) FindAll() ([]app.Event, error) {
-	events := make([]app.Event, 0)
-
 	sql := "SELECT id, title, date, duration, description, userId, notify_before FROM events ORDER BY date"
 	rows, err := s.conn.Query(s.ctx, sql)
 	if err != nil {
@@ -135,19 +129,56 @@ func (s *Storage) FindAll() ([]app.Event, error) {
 	}
 	defer rows.Close()
 
+	return createEventsFromRows(rows)
+}
+
+func (s *Storage) GetEventsReadyToNotify(dt time.Time) ([]app.Event, error) {
+	sql := `SELECT id, title, date, duration, description, userId, notify_before 
+			FROM events 
+			WHERE notified = false AND notify_at <= $1`
+	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return createEventsFromRows(rows)
+}
+
+func (s *Storage) GetEventsOlderThan(dt time.Time) ([]app.Event, error) {
+	sql := `SELECT id, title, date, duration, description, userId, notify_before 
+			FROM events 
+			WHERE date <= $1`
+	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return createEventsFromRows(rows)
+}
+
+func createEventsFromRows(rows pgx.Rows) ([]app.Event, error) {
+	var events []app.Event
+
 	for rows.Next() {
 		var e app.Event
 		var durationSeconds, notifyBeforeSeconds int
+		var description sql.NullString
 		if err := rows.Scan(
 			&e.ID,
 			&e.Title,
 			&e.Dt,
 			&durationSeconds,
-			&e.Description,
+			&description,
 			&e.UserID,
 			&notifyBeforeSeconds,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan SQL result into struct: %w", err)
+		}
+
+		if description.Valid {
+			e.Description = description.String
 		}
 
 		e.Duration = time.Duration(durationSeconds * 1000000000)
@@ -161,4 +192,15 @@ func (s *Storage) FindAll() ([]app.Event, error) {
 	}
 
 	return events, nil
+}
+
+func (s *Storage) MarkEventNotified(id uuid.UUID) error {
+	sql := "UPDATE events SET notified = true WHERE id = $1"
+	_, err := s.conn.Exec(
+		s.ctx,
+		sql,
+		id.String(),
+	)
+
+	return err
 }
