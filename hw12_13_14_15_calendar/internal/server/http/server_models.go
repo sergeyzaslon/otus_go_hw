@@ -14,8 +14,8 @@ type EventDto struct {
 	Date                string `json:"date"`
 	Duration            uint32 `json:"duration"`
 	Description         string `json:"description"`
-	UserID              string `json:"userId"`
-	NotifyBeforeSeconds uint32 `json:"notifyBeforeSeconds"`
+	UserID              string `json:"user_id"`
+	NotifyBeforeSeconds uint32 `json:"notify_before_seconds"`
 }
 
 type ErrorDto struct {
@@ -24,12 +24,12 @@ type ErrorDto struct {
 }
 
 func (e *EventDto) GetModel() (*app.Event, error) {
-	dt, err := time.Parse("2006-01-02 15:04:00", e.Date)
+	dt, err := time.Parse("2006-01-02 15:04:05", e.Date)
 	if err != nil {
 		return nil, fmt.Errorf("date exprected to be 'yyyy-mm-dd hh:mm:ss', got: %s, %w", e.Date, err)
 	}
 
-	duration := time.Second & time.Duration(e.Duration)
+	duration := time.Second * time.Duration(e.Duration)
 
 	notifyBefore := time.Second * time.Duration(e.NotifyBeforeSeconds)
 
@@ -50,7 +50,7 @@ func CreateEventDtoFromModel(event app.Event) EventDto {
 	dto := EventDto{}
 	dto.ID = event.ID.String()
 	dto.Title = event.Title
-	dto.Date = event.Dt.Format(time.RFC3339)
+	dto.Date = event.Dt.Format("2006-01-02 15:04:05")
 	dto.Duration = uint32(event.Duration.Seconds())
 	dto.Description = event.Description
 	dto.UserID = event.UserID

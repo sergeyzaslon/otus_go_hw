@@ -19,6 +19,7 @@ type Server struct {
 
 type Logger interface {
 	Info(msg string, params ...interface{})
+	Error(msg string, params ...interface{})
 	LogHTTPRequest(r *http.Request, code, length int)
 }
 
@@ -32,7 +33,7 @@ func NewServer(logger Logger, app *app.App, host string, port int) *Server {
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(host, strconv.Itoa(port)),
-		Handler: loggingMiddleware(NewRouter(app), logger),
+		Handler: loggingMiddleware(NewRouter(app, logger), logger),
 	}
 
 	myServer.server = httpServer
@@ -40,8 +41,8 @@ func NewServer(logger Logger, app *app.App, host string, port int) *Server {
 	return myServer
 }
 
-func NewRouter(app *app.App) http.Handler {
-	handlers := NewServerHandlers(app)
+func NewRouter(app *app.App, log Logger) http.Handler {
+	handlers := NewServerHandlers(app, log)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handlers.HelloWorld).Methods("GET")

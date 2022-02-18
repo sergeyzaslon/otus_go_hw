@@ -30,8 +30,8 @@ type Event struct {
 	Date                string `protobuf:"bytes,3,opt,name=date,proto3" json:"date,omitempty"`
 	Duration            uint32 `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"`
 	Description         string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	UserId              string `protobuf:"bytes,6,opt,name=userId,json=userId,proto3" json:"userId,omitempty"`
-	NotifyBeforeSeconds uint32 `protobuf:"varint,7,opt,name=notifyBeforeSeconds,json=notifyBeforeSeconds,proto3" json:"notifyBeforeSeconds,omitempty"`
+	UserId              string `protobuf:"bytes,6,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	NotifyBeforeSeconds uint32 `protobuf:"varint,7,opt,name=notify_before_seconds,json=notifyBeforeSeconds,proto3" json:"notify_before_seconds,omitempty"`
 }
 
 func (x *Event) Reset() {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
@@ -77,9 +76,8 @@ func (l *Logger) Error(msg string, params ...interface{}) {
 
 func (l *Logger) LogHTTPRequest(r *http.Request, code, length int) {
 	l.logg.Infof(
-		"%s [%v] %s %s %s %d %d %q",
+		"%s %s %s %s %d %d %q",
 		r.RemoteAddr,
-		time.Now().Format("02/Jan/2006:15:04:05 +0600"),
 		r.Method,
 		r.URL.String(),
 		r.Proto,

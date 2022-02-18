@@ -179,8 +179,8 @@ func createEventsFromRows(rows pgx.Rows) ([]app.Event, error) {
 			e.Description = description.String
 		}
 
-		e.Duration = time.Duration(durationSeconds * 1000000000)
-		e.NotifyBefore = time.Duration(notifyBeforeSeconds * 1000000000)
+		e.Duration = time.Second * time.Duration(durationSeconds)
+		e.NotifyBefore = time.Second * time.Duration(notifyBeforeSeconds)
 
 		events = append(events, e)
 	}

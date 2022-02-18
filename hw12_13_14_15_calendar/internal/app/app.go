@@ -2,11 +2,14 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+var ErrEventWithSuchIDAlreadyExists = errors.New("validation error: event with such id already exists")
 
 type App struct {
 	logg Logger
@@ -35,7 +38,7 @@ func (a *App) CreateEvent(ctx context.Context, evt Event) error {
 
 	if prev != nil {
 		a.logg.Warn("App.CreateEvent.AlreadyExists: %s", evt.ID)
-		return fmt.Errorf("validation error: event with such id already exists: %s", evt.ID)
+		return ErrEventWithSuchIDAlreadyExists
 	}
 
 	// Если ещё нет с таким ID - создаём

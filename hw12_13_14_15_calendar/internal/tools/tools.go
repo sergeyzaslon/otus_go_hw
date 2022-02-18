@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,4 +26,20 @@ func ExtractEventID(events []app.Event) []string {
 	}
 
 	return res
+}
+
+func JSONRemarshalString(body string) string {
+	bytes := []byte(body)
+	var ifce interface{}
+	err := json.Unmarshal(bytes, &ifce)
+	if err != nil {
+		return ""
+	}
+
+	output, err := json.Marshal(ifce)
+	if err != nil {
+		return ""
+	}
+
+	return string(output)
 }
