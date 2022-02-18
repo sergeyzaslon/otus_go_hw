@@ -1,20 +1,24 @@
 package main
 
-// При желании конфигурацию можно вынести в internal/config.
-// Организация конфига в main принуждает нас сужать API компонентов, использовать
-// при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
+import (
+	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/run/logger"
+	"github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/internal/run/storage"
+)
+
 type Config struct {
-	Logger LoggerConf
-	// TODO
+	Logger  logger.Conf
+	Storage storage.Conf
+	HTTP    HTTPConf
+	GRPC    GRPCConf
+	File    string `env:"LOG_FILE" default:"stderr"`
 }
 
-type LoggerConf struct {
-	Level string
-	// TODO
+type HTTPConf struct {
+	Host string `env:"HTTP_HOST" envDefault:"0.0.0.0"`
+	Port int    `env:"HTTP_PORT" envDefault:"80"`
 }
 
-func NewConfig() Config {
-	return Config{}
+type GRPCConf struct {
+	Host string `env:"HTTP_HOST" envDefault:"0.0.0.0"`
+	Port int    `env:"HTTP_PORT" envDefault:"8080"`
 }
-
-// TODO

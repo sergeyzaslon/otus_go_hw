@@ -1,0 +1,86 @@
+version: '3.4'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/calendar/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8012:80"
+      - "8013:8080"
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=$LOG_FILE
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+    command: ["/bin/sh", "-c", "net-wait-go -addrs db:5432 && /opt/calendar/calendar-app"]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./build/scheduler/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=$LOG_FILE
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+      - QUEUE_DSN=amqp://guest:guest@queue:5672/
+      - RABBIT_QUEUE=event_notifications
+      - RABBIT_EXCHANGE=calendar
+    command: ["/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sheduler"]
+
+  sender:
+    build:
+      context: .
+      dockerfile: ./build/sender/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=/var/logs/app.log
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+      - QUEUE_DSN=amqp://guest:guest@queue:5672/
+      - RABBIT_QUEUE=event_notifications
+      - RABBIT_EXCHANGE=calendar
+    command: ["/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sender"]
+    volumes:
+      - logs:/var/logs
+  
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
+
+  migrations:
+    build:
+      context: .
+      dockerfile: ./build/migrations/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://calendar:calendar@db:5432/calendar?sslmode=disable
+    command: ["/bin/sh", "-c", "net-wait-go -addrs db:5432 && /bin/goose up"]
+
+  queue: 
+    image: rabbitmq:3.9.11-management
+
+  tests:
+    build:
+      context: .
+      dockerfile: ./build/tests/Dockerfile
+    environment:
+      - APP_HOST=http://app
+      - APP_HOST_GRPC=app:8080
+    command: ["/bin/sh", "-c", "net-wait-go -addrs app:80,queue:5672 && go test github.com/sergeyzaslon/otus_go_hw/hw12_13_14_15_calendar/cmd/calendar_tests"]
+    volumes:
+      - logs:/var/logs
+
+volumes:
+  logs:

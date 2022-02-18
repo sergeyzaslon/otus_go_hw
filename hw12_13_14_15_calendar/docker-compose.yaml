@@ -1,0 +1,69 @@
+version: '3.4'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/calendar/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8012:80"
+      - "8013:8080"
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=$LOG_FILE
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./build/scheduler/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=$LOG_FILE
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+      - QUEUE_DSN=amqp://guest:guest@queue:5672/
+      - RABBIT_QUEUE=event_notifications
+      - RABBIT_EXCHANGE=calendar
+    command: ["/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sheduler"]
+
+  sender:
+    build:
+      context: .
+      dockerfile: ./build/sender/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - LOG_LEVEL=$LOG_LEVEL
+      - LOG_FILE=$LOG_FILE
+      - LOG_FORMAT=$LOG_FORMAT
+      - STORAGE_DSN=postgres://calendar:calendar@db:5432/calendar
+      - QUEUE_DSN=amqp://guest:guest@queue:5672/
+      - RABBIT_QUEUE=event_notifications
+      - RABBIT_EXCHANGE=calendar
+    command: ["/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sender"]
+  
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
+
+  migrations:
+    build:
+      context: .
+      dockerfile: ./build/migrations/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://calendar:calendar@db:5432/calendar?sslmode=disable
+    command: ["/bin/sh", "-c", "net-wait-go -addrs db:5432 && sleep 5 && /bin/goose up"]
+
+  queue: 
+    image: rabbitmq:3.9.11-management
