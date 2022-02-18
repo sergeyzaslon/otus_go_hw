@@ -14,8 +14,8 @@ type EventDto struct {
 	Date                string `json:"date"`
 	Duration            uint32 `json:"duration"`
 	Description         string `json:"description"`
-	UserID              string `json:"user_id"`
-	NotifyBeforeSeconds uint32 `json:"notify_before_seconds"`
+	UserID              string `json:"userId"`
+	NotifyBeforeSeconds uint32 `json:"notifyBeforeSeconds"`
 }
 
 type ErrorDto struct {

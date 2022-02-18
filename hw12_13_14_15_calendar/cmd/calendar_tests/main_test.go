@@ -42,8 +42,8 @@ func TestMain(t *testing.T) {
 		"description": "Test Event Description 01",
 		"date": "2021-12-20 12:30:00",
 		"duration": 60,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 60
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"notifyBeforeSeconds": 60
 	}`
 
 	respCode, _, err := RESTPost(&httpClient, host+"/events", body)
@@ -59,7 +59,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("Failed to get /events: %s", err)
 	}
 
-	bodyExpected := `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":60}]` // nolint:lll
+	bodyExpected := `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":60}]` // nolint:lll
 	require.Equal(t, bodyExpected, resBody)
 	require.Equal(t, 200, resCode)
 
@@ -79,8 +79,8 @@ func TestMain(t *testing.T) {
 		"description": "Test Event Description 01 UPD",
 		"date": "2021-12-20 12:30:30",
 		"duration": 70,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 70
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"notifyBeforeSeconds": 70
 	}`
 	respCode, _, err = RESTPut(&httpClient, host+"/events/4927aa58-a175-429a-a125-c04765597152", body)
 	if err != nil {
@@ -95,7 +95,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("Failed to get /events: %s", err)
 		t.FailNow()
 	}
-	bodyExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-20 12:30:30","duration":70,"description":"Test Event Description 01 UPD","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":70}]` // nolint:lll
+	bodyExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-20 12:30:30","duration":70,"description":"Test Event Description 01 UPD","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":70}]` // nolint:lll
 	require.Equal(t, bodyExpected, respBody)
 	require.Equal(t, 200, respCode)
 

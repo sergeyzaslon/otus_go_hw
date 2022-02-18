@@ -35,8 +35,8 @@ func TestHttpServerEventsCrud(t *testing.T) {
 		"description": "Test Event Description 01",
 		"date": "2021-12-20 12:30:00",
 		"duration": 60,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 60
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"notifyBeforeSeconds": 60
 	}`)
 	req := httptest.NewRequest("POST", "/events", body)
 	w := httptest.NewRecorder()
@@ -46,7 +46,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 
 	resp := w.Result()
 	respBody, _ := io.ReadAll(resp.Body)
-	respExpected := `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":60}` // nolint:lll
+	respExpected := `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":60}` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 
 	// Прочитаем то, что создали
@@ -55,7 +55,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 	httpHandlers.ServeHTTP(w, req)
 	resp = w.Result()
 	respBody, _ = io.ReadAll(resp.Body)
-	respExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":60}]` // nolint:lll
+	respExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":60}]` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 
 	// Обновим:
@@ -65,8 +65,8 @@ func TestHttpServerEventsCrud(t *testing.T) {
 		"description": "Test Event Description 01 UPD",
 		"date": "2021-12-21 12:30:00",
 		"duration": 120,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 120
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"notifyBeforeSeconds": 120
 	}`)
 	req = httptest.NewRequest("PUT", "/events/4927aa58-a175-429a-a125-c04765597152", body)
 	w = httptest.NewRecorder()
@@ -75,7 +75,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 
 	resp = w.Result()
 	respBody, _ = io.ReadAll(resp.Body)
-	respExpected = `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-21 12:30:00","duration":120,"description":"Test Event Description 01 UPD","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":120}` // nolint:lll
+	respExpected = `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-21 12:30:00","duration":120,"description":"Test Event Description 01 UPD","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":120}` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 
 	// Прочитаем то, что создали
@@ -84,7 +84,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 	httpHandlers.ServeHTTP(w, req)
 	resp = w.Result()
 	respBody, _ = io.ReadAll(resp.Body)
-	respExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-21 12:30:00","duration":120,"description":"Test Event Description 01 UPD","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":120}]` // nolint:lll
+	respExpected = `[{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-21 12:30:00","duration":120,"description":"Test Event Description 01 UPD","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notifyBeforeSeconds":120}]` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 }
 

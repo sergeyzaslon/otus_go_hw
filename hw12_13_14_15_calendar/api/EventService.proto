@@ -20,8 +20,8 @@ message Event {
 	string date = 3;
 	uint32 duration = 4;
 	string description = 5;
-	string user_id = 6;
-	uint32 notify_before_seconds = 7;
+	string userId = 6;
+	uint32 notifyBeforeSeconds = 7;
 }
 
 message DeleteEventRequest {
